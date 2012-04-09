@@ -1,6 +1,10 @@
 <?php
+require_once("phpmemcached/Autoload.php");
+
 //Local virtualbox servers
-$servers = array('10.0.1.6:11211', '10.0.1.7:11211');
+$servers = array('10.0.1.103:11211', '10.0.1.104:11211');
+
+// Create memcache instance and add servers
 $memcache = new Memcache();
 foreach($servers as $server) {
     $serverArray = explode(':', $server);
@@ -16,13 +20,13 @@ for($i=0; $i<1000; $i++) {
     $memcache->set(md5($i), sha1($i));
 }
 
-//include classes
-include 'MemcachedProtocol.php';
-include 'ConsistentHashing.php';
+
+use phpmemcached\Protocols;
+use phpmemcached\Algorithms;
 
 //Create objects
-$consistentHashingObject = new MyMemcached\ConsistentHashing($servers);
-$memcachedProtocolObject = new MyMemcached\MemcachedBinaryProtocol();
+$consistentHashingObject = new Algorithms\PhpMemcacheConsistentHashing($servers);
+$memcachedProtocolObject = new Protocols\MemcachedBinaryProtocol();
 
 for($i=0;$i<1000;$i++) {
     $serverAddress = $consistentHashingObject->findServer(md5($i));
